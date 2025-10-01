@@ -3,7 +3,6 @@ import numpy as np
 import re
 import plotly.express as px
 
-
 def prepare_columns(data: pd.DataFrame) -> pd.DataFrame:
     df = data.copy()
     required_cols = ["Pclass", "Age", "SibSp", "Parch", "Fare", "Survived"]
@@ -11,7 +10,6 @@ def prepare_columns(data: pd.DataFrame) -> pd.DataFrame:
         if c in df:
             df[c] = pd.to_numeric(df[c], errors="coerce")
     return df
-
 
 def classify_age_bracket(data: pd.DataFrame) -> pd.DataFrame:
     df = data.copy()
@@ -21,30 +19,35 @@ def classify_age_bracket(data: pd.DataFrame) -> pd.DataFrame:
     df["age_bracket"] = df["age_bracket"].astype(pd.CategoricalDtype(categories=labels, ordered=True))
     return df
 
-
 def categorize_class(data: pd.DataFrame) -> pd.DataFrame:
     df = data.copy()
     if "Pclass" in df:
         df["Pclass"] = pd.Categorical(df["Pclass"], categories=[1, 2, 3], ordered=True)
     return df
 
-
-def compute_survival_statistics(data: pd.DataFrame) -> pd.DataFrame:
+def survival_demographics(data: pd.DataFrame) -> pd.DataFrame:
     df = prepare_columns(data)
     df = classify_age_bracket(df)
     df = categorize_class(df)
-    grouped = df.groupby(["Pclass", "Sex", "age_bracket"], dropna=False, observed=True)
-    results = grouped["Survived"].agg(
-        total_passengers="size",
-        survivors=lambda x: np.nansum(x == 1)
+
+    # Group by Pclass, Sex, and age_group
+    grouped = df.groupby(['Pclass', 'Sex', 'age_group'], observed=True)
+
+    # Aggregate counts and survival statistics
+    results = grouped['Survived'].agg(
+        n_passengers='count',
+        n_survivors='sum',
+        survival_rate='mean'
     ).reset_index()
-    results["survival_fraction"] = results["survivors"] / results["total_passengers"]
-    results = results.sort_values(["Pclass", "Sex", "age_bracket"])
-    return results.reset_index(drop=True)
 
+    # Reorder for clarity: sort by class (ascending), sex (female first), age_group (ordered)
+    sex_order = ['female', 'male']
+    results['Sex'] = pd.Categorical(results['Sex'], categories=sex_order, ordered=True)
+    results = results.sort_values(['Pclass', 'Sex', 'age_group'])
+    return results
 
-def plot_survival_comparison(data: pd.DataFrame):
-    survival_data = compute_survival_statistics(data)
+def visualize_demographic(data: pd.DataFrame):
+    survival_data = survival_demographics(data)
     fig = px.bar(
         survival_data,
         x="age_bracket",
@@ -70,7 +73,9 @@ def plot_survival_comparison(data: pd.DataFrame):
     return fig
 
 
-def compute_family_characteristics(data: pd.DataFrame) -> pd.DataFrame:
+# Exercise 2
+
+def family_groups(data: pd.DataFrame) -> pd.DataFrame:
     df = prepare_columns(data)
     df = categorize_class(df)
     df["family_total"] = df["SibSp"].fillna(0) + df["Parch"].fillna(0) + 1
@@ -88,8 +93,7 @@ def compute_family_characteristics(data: pd.DataFrame) -> pd.DataFrame:
     )
     return grouped
 
-
-def extract_surnames(data: pd.DataFrame) -> pd.Series:
+def last_names(data: pd.DataFrame) -> pd.Series:
     if "Name" not in data:
         return pd.Series(dtype="int")
     df = data.copy()
@@ -105,8 +109,8 @@ def extract_surnames(data: pd.DataFrame) -> pd.Series:
     return surnames.value_counts(dropna=True)
 
 
-def plot_family_fare_relationship(data: pd.DataFrame):
-    family_data = compute_family_characteristics(data)
+def visualize_families(data: pd.DataFrame):
+    family_data = family_groups(data)
     line_chart = px.line(
         family_data,
         x="family_total",
@@ -140,7 +144,7 @@ def add_age_classification(data: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def plot_age_class_survival(data: pd.DataFrame):
+def visualize_family_size(data: pd.DataFrame):
     df = add_age_classification(data)
     summary = (
         df.groupby(["Pclass", "Sex", "older_than_class_median"], observed=True)
@@ -171,9 +175,4 @@ def plot_age_class_survival(data: pd.DataFrame):
     )
     fig.update_yaxes(tickformat=".0%")
     fig.update_layout(margin=dict(l=10, r=10, t=50, b=10), height=500)
-    return fig
-# Note: The functions below are designed to be called from app.py
-def visualize_demographic():
-    df = pd.read_csv('https://raw.githubusercontent.com/leontoddjohnson/datasets/main/data/titanic.csv')
-    fig = plot_survival_comparison(df)
     return fig

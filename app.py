@@ -32,12 +32,3 @@ st.write(
 # Generate and display the figure
 fig3 = visualize_family_size()
 st.plotly_chart(fig3, use_container_width=True)
-
-st.write(
-'''
-# Titanic Visualization 3
-'''
-)
-# Generate and display the figure
-fig4 = plot_age_class_survival(df)
-st.plotly_chart(fig4, use_container_width=True)
