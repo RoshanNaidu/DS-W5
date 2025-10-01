@@ -1,8 +1,6 @@
 import plotly.express as px
 import pandas as pd
 
-df = pd.read_csv('https://raw.githubusercontent.com/leontoddjohnson/datasets/main/data/titanic.csv')
-
 # Function to analyze survival demographics
 def survival_demographics(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -83,8 +81,6 @@ def visualize_demographic(summary_df: pd.DataFrame):
 
     return fig
 
-fig = visualize_demographic(summary_df)
-fig.show()  # OR st.plotly_chart(fig) in Streamlit
 
 # Function to analyze family groups
 def family_groups(df: pd.DataFrame) -> pd.DataFrame:
@@ -179,11 +175,3 @@ def visualize_families(family_df: pd.DataFrame):
         height=500
     )
     return fig
-
-
-# Generate processed data
-family_df = family_groups(df)
-
-# Generate plot
-fig = visualize_families(family_df)
-fig.show()  # or st.plotly_chart(fig) in Streamlit
