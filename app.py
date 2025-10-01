@@ -8,9 +8,10 @@ df = pd.read_csv('https://raw.githubusercontent.com/leontoddjohnson/datasets/mai
 st.write(
 '''
 # Titanic Visualization 1
-
+"Question: How does the survival rate vary across passenger class, sex, and age group on the Titanic?"
 '''
 )
+
 # Generate and display the figure
 fig1 = visualize_demographic()
 st.plotly_chart(fig1, use_container_width=True)
@@ -18,8 +19,10 @@ st.plotly_chart(fig1, use_container_width=True)
 st.write(
 '''
 # Titanic Visualization 2
+"Question: How does family size relate to the average ticket fare across different passenger classes?"
 '''
 )
+
 # Generate and display the figure
 fig2 = visualize_families()
 st.plotly_chart(fig2, use_container_width=True)
@@ -29,6 +32,7 @@ st.write(
 # Titanic Visualization Bonus
 '''
 )
+
 # Generate and display the figure
 fig3 = visualize_family_size()
 st.plotly_chart(fig3, use_container_width=True)
